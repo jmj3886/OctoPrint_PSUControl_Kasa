@@ -3,14 +3,14 @@ import setuptools
 
 ########################################################################################################################
 
-plugin_identifier = "psucontrol_tplink"
+plugin_identifier = "psucontrol_kasa"
 plugin_package = "octoprint_%s" % plugin_identifier
-plugin_name = "OctoPrint-PSUControl-TPLink"
-plugin_version = "1.0.1"
-plugin_description = "Adds TPLink Smart Plug support to OctoPrint-PSUControl as a sub-plugin"
-plugin_author = "Shawn Bruce"
-plugin_author_email = "kantlivelong@gmail.com"
-plugin_url = "https://github.com/kantlivelong/OctoPrint-PSUControl-TPLink"
+plugin_name = "OctoPrint_PSUControl_Kasa"
+plugin_version = "1.0.0"
+plugin_description = "Adds TPLink/Kasa Smart Plug support to OctoPrint-PSUControl as a sub-plugin"
+plugin_author = "Joshua M. Jarvis"
+plugin_author_email = "jmj3886@rit.edu"
+plugin_url = "https://github.com/jmj3886/OctoPrint_PSUControl_Kasa.git"
 plugin_license = "AGPLv3"
 plugin_additional_data = []
 

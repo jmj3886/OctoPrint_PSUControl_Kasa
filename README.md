@@ -1,5 +1,7 @@
-# OctoPrint PSU Control - TPLink
-Adds TPLink Smart Plug support to OctoPrint-PSUControl as a sub-plugin
+# OctoPrint PSU Control - Kasa
+Adds TPLink/Kasa Smart Plug support to OctoPrint-PSUControl as a sub-plugin
+
+Forked from [PSU Control - TPLink](https://github.com/kantlivelong/OctoPrint-PSUControl-TPLink)
 
 ## Setup
 - Install the plugin using Plugin Manager from Settings
