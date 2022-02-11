@@ -41,7 +41,7 @@ class PSUControl_Kasa(octoprint.plugin.StartupPlugin,
 
             self.config[k] = v
             self._logger.debug("{}: {}".format(k, v))
-        address = asyncio.run(cli.find_host_from_alias(self.config['alias']))
+        address = asyncio.create_task(cli.find_host_from_alias(self.config['alias']))
         if address is None:
             self._logger.error("No Kasa device was found matching the name '{}'".format(self.config['alias']))
         else:
@@ -59,24 +59,26 @@ class PSUControl_Kasa(octoprint.plugin.StartupPlugin,
     def turn_psu_on(self):
         self._logger.debug("Switching PSU On")
         if self.config['is_smart_strip']:
-                asyncio.run(SmartStrip(self.config['address']).children[self.config['plug']].turn_on())
+            plug = SmartStrip(self.config['address']).children[self.config['plug']]
         else:
-                asyncio.run(SmartPlug(self.config['address']).turn_on())
+            plug = SmartPlug(self.config['address'])
+        asyncio.create_task(plug.turn_on())
 
     def turn_psu_off(self):
         self._logger.debug("Switching PSU Off")
         if self.config['is_smart_strip']:
-                asyncio.run(SmartStrip(self.config['address']).children[self.config['plug']].turn_off())
+            plug = SmartStrip(self.config['address']).children[self.config['plug']]
         else:
-                asyncio.run(SmartPlug(self.config['address']).turn_off())
+            plug = SmartPlug(self.config['address'])
+        asyncio.create_task(plug.turn_off())
 
     def get_psu_state(self):
         self._logger.debug("Getting PSU State")
         if self.config['is_smart_strip']:
-                result = asyncio.run(SmartStrip(self.config['address']).children[self.config['plug']].is_on())
+                plug = SmartStrip(self.config['address']).children[self.config['plug']]
         else:
-                result = asyncio.run(SmartPlug(self.config['address']).is_on())
-        return result
+                plug = SmartPlug(self.config['address'])
+        return asyncio.create_task(plug.is_on())
 
     def on_settings_save(self, data):
         octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
