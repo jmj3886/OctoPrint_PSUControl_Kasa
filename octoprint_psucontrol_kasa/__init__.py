@@ -41,10 +41,14 @@ class PSUControl_Kasa(octoprint.plugin.StartupPlugin,
 
             self.config[k] = v
             self._logger.debug("{}: {}".format(k, v))
-        address = asyncio.create_task(cli.find_host_from_alias(self.config['alias']))
+        if asyncio.get_event_loop().is_running():
+            address = None
+        else:
+            address = asyncio.run(cli.find_host_from_alias(self.config['alias']))
         if address is None:
             self._logger.error("No Kasa device was found matching the name '{}'".format(self.config['alias']))
         else:
+            self._logger.info("{} found at address={}".format(self.config['alias'], address))
             self.config['address'] = address
 
     def on_startup(self, host, port):
@@ -57,7 +61,7 @@ class PSUControl_Kasa(octoprint.plugin.StartupPlugin,
         psucontrol_helpers['register_plugin'](self)
 
     def turn_psu_on(self):
-        self._logger.debug("Switching PSU On")
+        self._logger.info("Switching PSU On with {} at address={}".format(self.config['alias'], self.config['address']))
         if self.config['is_smart_strip']:
             plug = SmartStrip(self.config['address']).children[self.config['plug']]
         else:
@@ -65,7 +69,7 @@ class PSUControl_Kasa(octoprint.plugin.StartupPlugin,
         asyncio.create_task(plug.turn_on())
 
     def turn_psu_off(self):
-        self._logger.debug("Switching PSU Off")
+        self._logger.info("Switching PSU Off with {} at address={}".format(self.config['alias'], self.config['address']))
         if self.config['is_smart_strip']:
             plug = SmartStrip(self.config['address']).children[self.config['plug']]
         else:
@@ -73,7 +77,7 @@ class PSUControl_Kasa(octoprint.plugin.StartupPlugin,
         asyncio.create_task(plug.turn_off())
 
     def get_psu_state(self):
-        self._logger.debug("Getting PSU State")
+        self._logger.info("Getting PSU State with {} at address={}".format(self.config['alias'], self.config['address']))
         if self.config['is_smart_strip']:
                 plug = SmartStrip(self.config['address']).children[self.config['plug']]
         else:
