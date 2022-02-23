@@ -41,8 +41,10 @@ class PSUControl_Kasa(octoprint.plugin.StartupPlugin,
 
             self.config[k] = v
             self._logger.debug("{}: {}".format(k, v))
-        if asyncio.get_event_loop().is_running():
-            address = None
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            host_task = asyncio.run_coroutine_threadsafe(cli.find_host_from_alias(self.config['alias']), loop)
+            address = host_task.result()
         else:
             address = asyncio.run(cli.find_host_from_alias(self.config['alias']))
         if address is None:
