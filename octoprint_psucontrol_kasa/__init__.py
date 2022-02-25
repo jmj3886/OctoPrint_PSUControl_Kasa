@@ -7,12 +7,15 @@ __copyright__ = "Copyright (C) 2022 Joshua M. Jarvis - Released under terms of t
 
 import octoprint.plugin
 import asyncio
-from multiprocessing import Thread
+from threading import Thread
 from kasa import cli, SmartPlug, SmartStrip
 
 
-async def get_address_via_thread(alias, result):
-   result[0] = await cli.find_host_from_alias(alias)
+def run_async_await(func, args, result):
+    if len(args) > 0:
+        asyncio.run(func(args))
+    else:
+        asyncio.run(func())
 
 
 class PSUControl_Kasa(octoprint.plugin.StartupPlugin,
@@ -50,10 +53,10 @@ class PSUControl_Kasa(octoprint.plugin.StartupPlugin,
         loop = asyncio.get_event_loop()
         if loop.is_running():
             result = []
-            address_thread = Thread(target=get_address_via_thread, args=(self.config['alias'],result))
-            address_thread.start()
-            address_thread.join()
-            address = result[0]
+            async_thread = Thread(run_async_await, (cli.find_host_from_alias, tuple(self.config['alias']), result))
+            async_thread.start()
+            async_thread.join()
+            address = result[-1]
         else:
             address = asyncio.run(cli.find_host_from_alias(self.config['alias']))
         if address is None:
@@ -93,7 +96,8 @@ class PSUControl_Kasa(octoprint.plugin.StartupPlugin,
                 plug = SmartStrip(self.config['address']).children[self.config['plug']]
         else:
                 plug = SmartPlug(self.config['address'])
-        return asyncio.create_task(plug.is_on())
+        asyncio.create_task(plug.is_on())
+        return plug.is_on
 
     def on_settings_save(self, data):
         octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
