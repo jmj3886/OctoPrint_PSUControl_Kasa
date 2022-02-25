@@ -7,7 +7,13 @@ __copyright__ = "Copyright (C) 2022 Joshua M. Jarvis - Released under terms of t
 
 import octoprint.plugin
 import asyncio
+from multiprocessing import Thread
 from kasa import cli, SmartPlug, SmartStrip
+
+
+async def get_address_via_thread(alias, result):
+   result[0] = await cli.find_host_from_alias(alias)
+
 
 class PSUControl_Kasa(octoprint.plugin.StartupPlugin,
                         octoprint.plugin.RestartNeedingPlugin,
@@ -43,9 +49,11 @@ class PSUControl_Kasa(octoprint.plugin.StartupPlugin,
             self._logger.debug("{}: {}".format(k, v))
         loop = asyncio.get_event_loop()
         if loop.is_running():
-            find_host = cli.find_host_from_alias(self.config['alias'])
-            yield from find_host.__await__()
-            address = find_host.result()
+            result = []
+            address_thread = Thread(target=get_address_via_thread, args=(self.config['alias'],result))
+            address_thread.start()
+            address_thread.join()
+            address = result[0]
         else:
             address = asyncio.run(cli.find_host_from_alias(self.config['alias']))
         if address is None:
