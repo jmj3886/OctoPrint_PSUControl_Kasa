@@ -13,10 +13,9 @@ from kasa import cli, SmartPlug, SmartStrip
 
 def run_async_await(func, result, arg=None):
     if arg is None:
-        asyncio.run(func())
+        result.append(asyncio.run(func()))
     else:
-        asyncio.run(func(arg))
-
+        result.append(asyncio.run(func(arg)))
 
 class PSUControl_Kasa(octoprint.plugin.StartupPlugin,
                         octoprint.plugin.RestartNeedingPlugin,
@@ -53,7 +52,7 @@ class PSUControl_Kasa(octoprint.plugin.StartupPlugin,
         loop = asyncio.get_event_loop()
         if loop.is_running():
             result = []
-            async_thread = Thread(target=run_async_await, (cli.find_host_from_alias, result, self.config['alias']))
+            async_thread = Thread(target=run_async_await, args=(cli.find_host_from_alias, result, self.config['alias']))
             async_thread.start()
             async_thread.join()
             address = result[-1]
@@ -97,7 +96,7 @@ class PSUControl_Kasa(octoprint.plugin.StartupPlugin,
         else:
                 plug = SmartPlug(self.config['address'])
         result = []
-        async_thread = Thread(target=run_async_await, (plug.update, result))
+        async_thread = Thread(target=run_async_await, args=(plug.update, result))
         async_thread.start()
         async_thread.join()
         return plug.is_on
